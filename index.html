@@ -249,10 +249,10 @@
                 <li key={item.id} >
                   <span
                           style={{textDecoration: item.complete ? 'line-through' : 'none'}}
-                          onClick={() => props.toggle && props.toggle(item.id)}
+                          onClick={() => props.toggle && props.toggle(item)}
                   >
                     {item.name}
-                    <button onClick={() => props.remove(item.id)}>X</button>
+                    <button onClick={() => props.remove(item)}>X</button>
                   </span>
                 </li>
               ))}
@@ -271,8 +271,17 @@
       }))
     }
 
-    toggleItem= (id) => {
-      this.props.store.dispatch(toggleTodoAction(id))
+    toggleItem= (todo) => {
+      this.props.store.dispatch(toggleTodoAction(todo.id))
+    }
+
+    removeItem= (todo) => {
+      this.props.store.dispatch(removeTodoAction(todo.id))
+      return  API.deleteTodo(todo.id)
+          .catch(() => {
+            this.props.store.dispatch(addTodoAction(todo))
+            alert('An error occured. Try again.')
+          })
     }
 
     render() {
@@ -288,7 +297,7 @@
                 <button onClick={this.addItem}>Add Todo</button>
                 <List
                         toggle={this.toggleItem}
-                        remove={(id) => this.props.store.dispatch(removeTodoAction(id))}
+                        remove={this.removeItem}
                         items={todos}
                 />
               </div>
@@ -306,6 +315,15 @@
       }))
     }
 
+    removeItem= (goal) => {
+      this.props.store.dispatch(removeGoalAction(goal.id))
+      return API.deleteTodo(goal.id)
+              .catch(() => {
+                this.props.store.dispatch(addGoalAction(todo))
+                alert('An error occured. Try again.')
+              })
+    }
+
     render() {
       const { goals } = this.props.store.getState()
       return (
@@ -318,7 +336,7 @@
                 />
                 <button onClick={this.addItem}>Add Goal</button>
                 <List
-                        remove={(id) => this.props.store.dispatch(removeGoalAction(id))}
+                        remove={this.removeItem}
                         items={goals}
                 />
               </div>
