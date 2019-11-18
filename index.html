@@ -146,10 +146,8 @@
   }
 
   function handleRemoveTodo(todo) {
-    console.log('HandleRemoveTodo')
     return (dispatch) => {
       dispatch(removeTodoAction(todo.id))
-      console.log(`Dispatched remove todo `)
       return  API.deleteTodo(todo.id)
          .catch(() => {
             dispatch(addTodoAction(todo))
