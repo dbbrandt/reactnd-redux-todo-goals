@@ -145,6 +145,54 @@
     }
   }
 
+  function handleReceiveData() {
+    return (dispatch) => {
+      Promise.all([
+        API.fetchTodos(),
+        API.fetchGoals(),
+      ]).then(([todos, goals]) => {
+        dispatch(receiveData(todos, goals))
+      })
+    }
+  }
+
+  function handleAddTodo(name, cb) {
+    return (dispatch) => {
+      return API.saveTodo(name)
+        .then((todo) => {
+          dispatch(addTodoAction(todo))
+          cb()
+        })
+        .catch(()  => {
+          alert('Sorry, an error occured. Try again.')
+        })
+    }
+  }
+
+  function handleToggleTodo(id) {
+    return (dispatch) => {
+      dispatch(toggleTodoAction(id))
+      return API.saveTodoToggle(id)
+        .catch(() => {
+          dispatch(toggleTodoAction(id))
+          alert('An error occured. Try again.')
+        })
+    }
+  }
+
+  function handleAddGoal(name, cb) {
+    return (dispatch) => {
+      return API.saveGoal(name)
+        .then((goal) => {
+          dispatch(addGoalAction(goal))
+          cb()
+        })
+        .catch(() => {
+          alert('Sorry, an error occured. Try again.')
+        })
+    }
+  }
+
   function handleRemoveTodo(todo) {
     return (dispatch) => {
       dispatch(removeTodoAction(todo.id))
@@ -155,6 +203,18 @@
           })
     }
   }
+
+  function handleRemoveGoal(goal) {
+    return (dispatch) => {
+      dispatch(removeGoalAction(goal.id))
+      return  API.deleteGoal(goal.id)
+        .catch(() => {
+          dispatch(addGoalAction(goal))
+          alert('An error occured. Try again.')
+        })
+    }}
+
+
 
   // // A simple implementation of Thunk middle ware
   // const thunk = (store) => (next) => (action) => {
@@ -277,34 +337,26 @@
             </ul>
     )
   }
+
   class Todos extends React.Component {
     addItem = (e) => {
       e.preventDefault()
-      return API.saveTodo(this.input.value)
-        .then((todo) => {
-          this.props.store.dispatch(addTodoAction(todo))
-          this.input.value = ''
-        })
-        .catch(()  => {
-          alert('Sorry, an error occured. Try again.')
-        })
+      return this.props.dispatch(handleAddTodo(
+              this.input.value,
+              () => this.input.value = ''
+      ))
     }
 
     toggleItem= (id) => {
-      this.props.store.dispatch(toggleTodoAction(id))
-      return API.saveTodoToggle(id)
-        .catch(() => {
-          this.props.store.dispatch(toggleTodoAction(id))
-          alert('An error occured. Try again.')
-        })
+      this.props.dispatch(handleToggleTodo(id))
     }
 
     removeItem= (todo) => {
-      this.props.store.dispatch(handleRemoveTodo(todo))
+      this.props.dispatch(handleRemoveTodo(todo))
     }
 
     render() {
-      const { todos } = this.props.store.getState()
+      const { todos } = this.props
       return (
               <div>
                 <h1>Todo List</h1>
@@ -323,30 +375,23 @@
       )
     }
   }
+
+
   class Goals extends React.Component {
     addItem = (e) => {
       e.preventDefault()
-      return API.saveGoal(this.input.value)
-        .then((goal) => {
-          this.props.store.dispatch(addGoalAction(goal))
-          this.input.value = ''
-        })
-        .catch(() => {
-          alert('Sorry, an error occured. Try again.')
-        })
+      return this.props.dispatch(handleAddGoal(
+              this.input.value,
+              () => this.input.value = ''
+      ))
     }
 
     removeItem= (goal) => {
-      this.props.store.dispatch(removeGoalAction(goal.id))
-      return API.deleteTodo(goal.id)
-              .catch(() => {
-                this.props.store.dispatch(addGoalAction(todo))
-                alert('An error occured. Try again.')
-              })
+      this.props.dispatch(handleRemoveGoal(goal))
     }
 
     render() {
-      const { goals } = this.props.store.getState()
+      const { goals } = this.props
       return (
               <div>
                 <h1>Goals List</h1>
@@ -366,34 +411,82 @@
   }
   class App extends React.Component {
     componentDidMount() {
-      const { store } = this.props
-      store.subscribe(() => this.forceUpdate())
-      Promise.all([
-        API.fetchTodos(),
-        API.fetchGoals(),
-      ]).then(([todos, goals]) => {
-        store.dispatch(receiveData(todos,goals))
-      })
-
+      const { dispatch } = this.props
+      dispatch(handleReceiveData())
     }
     render() {
-      const { store } = this.props
-      const { loading } = store.getState()
       return (
-          loading ?
+          this.props.loading ?
             <h3>Loading....</h3>
             :
            <div>
-                <Todos store={store}/>
-                <Goals store={store}/>
+                <ConnectedTodos/>
+                <ConnectedGoals/>
            </div>
       )
     }
   }
+
+  class ConnectedTodos extends React.Component {
+    render() {
+      return (
+              <Context.Consumer>
+                {(store) => {
+                  const { todos } = store.getState()
+                  return (<Todos todos={todos} dispatch={store.dispatch}/>)
+                }}
+              </Context.Consumer>
+      )
+    }
+  }
+
+  class ConnectedGoals extends React.Component {
+    render() {
+      return (
+              <Context.Consumer>
+                {(store) => {
+                  const { goals } = store.getState()
+                  return (<Goals goals={goals} dispatch={store.dispatch}/>)
+                }}
+              </Context.Consumer>
+      )
+    }
+  }
+
+  const ConnectedApp = connect((store) => ({
+      loading: store.loading
+  }))(App)
+
+  class ConnectedApp extends React.Component {
+    render() {
+      return(
+        <Context.Consumer>
+          {(store) =>  (
+            <App store={store}/>
+          )}
+        </Context.Consumer>
+      )
+    }
+  }
+
+  const Context = React.createContext()
+
+  class Provider extends React.Component {
+    render() {
+      return(
+        <Context.Provider value={this.props.store}>
+          {this.props.children}
+        </Context.Provider>
+      )}
+  }
+
   ReactDOM.render(
-          <App store={store}/>,
+          <Provider store={store}>
+            <ConnectedApp/>
+          </Provider>,
           document.getElementById('app')
   )
-</script>
+
+ </script>
 </body>
 </html>
