@@ -411,12 +411,14 @@
   }
   class App extends React.Component {
     componentDidMount() {
-      const { dispatch } = this.props
-      dispatch(handleReceiveData())
+      const { store } = this.props
+      store.subscribe(() => this.forceUpdate())
+      store.dispatch(handleReceiveData())
     }
     render() {
+      const { loading } = store.getState()
       return (
-          this.props.loading ?
+          loading ?
             <h3>Loading....</h3>
             :
            <div>
@@ -452,10 +454,6 @@
       )
     }
   }
-
-  const ConnectedApp = connect((store) => ({
-      loading: store.loading
-  }))(App)
 
   class ConnectedApp extends React.Component {
     render() {
