@@ -6,6 +6,7 @@
     <script src="https://unpkg.com/react@16.3.0-alpha.1/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/redux-thunk@2.2.0/dist/redux-thunk.min.js"></script>
+    <script src="https://unpkg.com/react-redux@5.0.6/dist/react-redux.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
     <script src="https://tylermcginnis.com/goals-todos-api/index.js"></script>
   </head>
@@ -28,7 +29,8 @@
     <div id="app"></div>
 
     <script type="text/javascript">
-      // Library Code
+
+      // Library Code - Simple Implementation of Redux
       // function createStore (reducer) {
       //   // The store should have four parts
       //   // 1. The state
@@ -59,13 +61,16 @@
       //     dispatch,
       //   }
       // }
-      function generateId() {
-        return (
-          Math.random()
-            .toString(36)
-            .substring(2) + new Date().getTime().toString(36)
-        );
-      }
+
+      // Generate a unique id for new items. (Replaced by API)
+      // function generateId() {
+      //   return (
+      //     Math.random()
+      //       .toString(36)
+      //       .substring(2) + new Date().getTime().toString(36)
+      //   );
+      // }
+
       // App Code
       const ADD_TODO = "ADD_TODO";
       const REMOVE_TODO = "REMOVE_TODO";
@@ -242,6 +247,7 @@
       //   return next(action)
       // }
 
+      // Example of a middleware
       const logger = store => next => action => {
         console.group(action.type);
         console.log("The action: ", action);
@@ -250,6 +256,8 @@
         console.groupEnd();
         return result;
       };
+
+      // Creating a Redux store with reducers and middleware
       const store = Redux.createStore(
         Redux.combineReducers({
           todos,
@@ -258,6 +266,9 @@
         }),
         Redux.applyMiddleware(ReduxThunk.default, logger)
       );
+
+
+      // Implementaiton of UI without React - REPLACED WITH REACT COMPONENTS
 
       // store.subscribe(() => {
       //   const { goals, todos } = store.getState()
@@ -325,27 +336,9 @@
     </script>
 
     <script type="text/babel">
-      function List(props) {
-        return (
-          <ul>
-            {props.items.map(item => (
-              <li key={item.id}>
-                <span
-                  style={{
-                    textDecoration: item.complete ? "line-through" : "none"
-                  }}
-                  onClick={() => props.toggle && props.toggle(item.id)}
-                >
-                  {item.name}
-                  <button onClick={() => props.remove(item)}>X</button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        );
-      }
 
       // Home spun version of connect
+      /*
       function connect(getStateNeeded) {
         return (Component) => {
           class Receiver extends React.Component {
@@ -376,6 +369,28 @@
           }
           return ConnectedComponent;
         }
+      }
+      */
+
+      // List component
+      function List(props) {
+        return (
+                <ul>
+                  {props.items.map(item => (
+                          <li key={item.id}>
+                <span
+                        style={{
+                          textDecoration: item.complete ? "line-through" : "none"
+                        }}
+                        onClick={() => props.toggle && props.toggle(item.id)}
+                >
+                  {item.name}
+                  <button onClick={() => props.remove(item)}>X</button>
+                </span>
+                          </li>
+                  ))}
+                </ul>
+        );
       }
 
       class Todos extends React.Component {
@@ -415,7 +430,7 @@
         }
       }
 
-      const ConnectedTodos = connect((state) => ({
+      const ConnectedTodos = ReactRedux.connect((state) => ({
         todos: state.todos
       }))(Todos);
 
@@ -448,7 +463,7 @@
         }
       }
 
-      const ConnectedGoals = connect((state) => ({
+      const ConnectedGoals = ReactRedux.connect((state) => ({
         goals: state.goals
       }))(Goals);
 
@@ -469,10 +484,12 @@
         }
       }
 
-      const ConnectedApp = connect((state) => ({
+      const ConnectedApp = ReactRedux.connect((state) => ({
         loading: state.loading
       }))(App);
 
+     // Home Spun version of Provider using the React Context.
+     /*
       const Context = React.createContext();
 
       class Provider extends React.Component {
@@ -484,11 +501,12 @@
           );
         }
       }
+      */
 
       ReactDOM.render(
-        <Provider store={store}>
+        <ReactRedux.Provider store={store}>
           <ConnectedApp />
-        </Provider>,
+        </ReactRedux.Provider>,
         document.getElementById("app")
       );
     </script>
