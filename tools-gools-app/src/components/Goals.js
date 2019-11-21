@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { handleAddGoal, handleDeleteGoal} from "../actions/Store";
+import {  handleAddGoal, handleDeleteGoal} from "../actions/goals";
 import List from './List';
 
 class Goals extends Component {
@@ -32,8 +32,6 @@ class Goals extends Component {
   }
 }
 
-const ConnectedGoals = connect(state => ({
+export default connect(state => ({
   goals: state.goals
 }))(Goals);
-
-export default ConnectedGoals;

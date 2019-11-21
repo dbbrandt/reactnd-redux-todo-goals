@@ -6,6 +6,6 @@ export default function loading(state = true, action) {
       return false;
     default:
       return state;
-  }d
+  }
 }
 

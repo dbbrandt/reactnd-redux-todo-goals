@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import { handleReceiveData } from "../actions/Store";
-import ConnectedTodos from "./Todos";
-import ConnectedGoals from "./Goals";
+import { handleReceiveData} from "./actions/share";
+import Todos from "./components/Todos";
+import Goals from "./components/Goals";
 
 class App extends React.Component {
   componentDidMount() {
@@ -14,13 +14,11 @@ class App extends React.Component {
       <h3>Loading....</h3>
     ) : (
       <div>
-        <ConnectedTodos />
-        <ConnectedGoals />
+        <Todos />
+        <Goals />
       </div>
     );
   }
 }
 
-const ConnectedApp = connect(state => ({ ...state }))(App);
-
-export default ConnectedApp;
+export default connect(state => ({ ...state }))(App);

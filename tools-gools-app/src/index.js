@@ -1,12 +1,18 @@
 import React from "react";
+import { createStore } from "redux";
 import ReactDOM from "react-dom";
-import "./index.css";
-import ConnectedApp from "./components/App";
 import { Provider } from "react-redux";
-import Store from "./actions/Store"
+import App from "./App";
+import reducer from './reducers'
+import middleware from './middleware'
 
-ReactDOM.render(<Provider store={Store}>
-                  <ConnectedApp />
+const store = createStore(
+    reducer,
+    middleware
+);
+
+ReactDOM.render(<Provider store={store}>
+                  <App/>
                 </Provider>,
                 document.getElementById("root"));
 

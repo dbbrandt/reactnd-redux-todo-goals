@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { handleAddTodo, handleToggleTodo, handleDeleteTodo} from "../actions/Store";
+import { handleAddTodo, handleDeleteTodo, handleToggleTodo} from "../actions/todos";
 import List from './List';
 
 class Todos extends Component {
@@ -36,8 +36,7 @@ class Todos extends Component {
   }
 }
 
-const ConnectedTodos = connect(state => ({
+export default connect(state => ({
   todos: state.todos
 }))(Todos);
 
-export default ConnectedTodos;

@@ -46,7 +46,7 @@ export function handleDeleteTodo(todo) {
   };
 }
 
-function handleToggleTodo(id) {
+export function handleToggleTodo(id) {
   return dispatch => {
     dispatch(toggleTodo(id));
     return API.saveTodoToggle(id).catch(() => {
